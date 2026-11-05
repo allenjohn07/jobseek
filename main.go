@@ -1,26 +1,25 @@
 package main
 
 import (
-	"fmt" //used to format and print something
-	"log" //similar to console log
-	"net/http" //Go built in web server
+	"log"
+	"net/http"
 )
 
 func main() {
-	//creating a router using the NewServeMux()
+	db, err := openDB("jobs.db") // creates jobs.db next to the program if it doesn't exist
+	if err != nil {
+		log.Fatal(err) // can't run without a database, so print the error and exit
+	}
+	defer db.Close() // close the database when main exits
+
+	app := &App{db: db} // & = make a pointer to a new App holding our db
+
 	mux := http.NewServeMux()
+	// Go 1.22+ lets you put the HTTP method in the pattern.
+	// The same URL can go to different handlers depending on GET vs POST.
+	mux.HandleFunc("GET /api/jobs", app.handleListJobs)
+	mux.HandleFunc("POST /api/jobs", app.handleCreateJob)
 
-	//calling the HandleFunc and passing the req type, path and also a function that accepts and res, and req.
-	// here r is a pointer to the request.
-	// fmt.Fprintln print the response 
-	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Hello from Jobseek!")
-	})
-
-	//logs that the server is listening on port 808
 	log.Println("listening on http://localhost:8080")
-
-	// Start the HTTP server on port 8080.
-	// If the server fails, log the error and terminate the program.
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
