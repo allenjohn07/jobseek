@@ -3,7 +3,9 @@ package main
 import (
 	"database/sql"
 	"encoding/json" // convert Go structs <-> JSON
+	"errors"   // NEW: lets us check which error we got (errors.Is)
 	"net/http"
+	"strconv"  // NEW: converts strings to numbers ("42" -> 42)
 )
 
 // App holds things our handlers need to share, like the database.
@@ -50,4 +52,92 @@ func (a *App) handleCreateJob(w http.ResponseWriter, r *http.Request) {
 	}
 	j.ID = id                              // fill in the id the database assigned
 	writeJSON(w, http.StatusCreated, j)    // 201 = "created", and send back the saved job
+}
+
+// parseID reads the {id} part of the URL and turns it into a number.
+// The three handlers below all need it, so it lives in one place.
+func parseID(r *http.Request) (int64, error) {
+	// r.PathValue("id") returns the text matched by {id} in the route, e.g. "7" for /api/jobs/7.
+	// ParseInt(text, 10, 64) = parse as base-10, fitting in 64 bits. "abc" gives an error.
+	return strconv.ParseInt(r.PathValue("id"), 10, 64)
+}
+
+// GET /api/jobs/{id}: return one job.
+func (a *App) handleGetJob(w http.ResponseWriter, r *http.Request) {
+	id, err := parseID(r)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest) // 400: e.g. /api/jobs/abc
+		return
+	}
+	j, err := getJob(a.db, id)
+	if errors.Is(err, sql.ErrNoRows) { // errors.Is checks whether err is that specific error
+		http.Error(w, "job not found", http.StatusNotFound) // 404: valid id, but no such job
+		return
+	}
+	if err != nil { // any other error means something actually broke
+		http.Error(w, err.Error(), http.StatusInternalServerError) // 500
+		return
+	}
+	writeJSON(w, http.StatusOK, j)
+}
+
+
+// PUT /api/jobs/{id}: replace a job's fields with the JSON sent.
+func (a *App) handleUpdateJob(w http.ResponseWriter, r *http.Request) {
+	id, err := parseID(r)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+	var j Job
+	if err := json.NewDecoder(r.Body).Decode(&j); err != nil { // same decoding as in create
+		http.Error(w, "invalid JSON", http.StatusBadRequest)
+		return
+	}
+	if j.Company == "" || j.Title == "" { // same validation as in create
+		http.Error(w, "company and title are required", http.StatusBadRequest)
+		return
+	}
+	if j.Status == "" {
+		j.Status = "wishlist"
+	}
+	j.ID = id // trust the id in the URL, not whatever might be in the JSON body
+
+	err = updateJob(a.db, j) // "=" not ":=" because err already exists in this function
+	if errors.Is(err, sql.ErrNoRows) {
+		http.Error(w, "job not found", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// Read the job back from the database so the response includes everything,
+	// including fields the client didn't send, like createdAt.
+	updated, err := getJob(a.db, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, http.StatusOK, updated)
+}
+
+
+// DELETE /api/jobs/{id}: remove a job.
+func (a *App) handleDeleteJob(w http.ResponseWriter, r *http.Request) {
+	id, err := parseID(r)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+	err = deleteJob(a.db, id)
+	if errors.Is(err, sql.ErrNoRows) {
+		http.Error(w, "job not found", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent) // 204 = "done, and there's nothing to send back"
 }

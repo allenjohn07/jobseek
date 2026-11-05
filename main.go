@@ -19,6 +19,9 @@ func main() {
 	// The same URL can go to different handlers depending on GET vs POST.
 	mux.HandleFunc("GET /api/jobs", app.handleListJobs)
 	mux.HandleFunc("POST /api/jobs", app.handleCreateJob)
+	mux.HandleFunc("GET /api/jobs/{id}", app.handleGetJob)    // {id} is a wildcard: matches /api/jobs/1, /api/jobs/42, ...
+	mux.HandleFunc("PUT /api/jobs/{id}", app.handleUpdateJob) // same URL, different method = different handler
+	mux.HandleFunc("DELETE /api/jobs/{id}", app.handleDeleteJob)
 
 	log.Println("listening on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", mux))

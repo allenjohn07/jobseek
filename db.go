@@ -84,3 +84,55 @@ func createJob(db *sql.DB, j Job) (int64, error) {
 	}
 	return res.LastInsertId() // the id SQLite just assigned to the new row
 }
+
+
+// getJob returns the single job with this id.
+func getJob(db *sql.DB, id int64) (Job, error) {
+	var j Job // an empty Job to fill in
+	// QueryRow is like Query, but for when you expect at most ONE row.
+	// You chain .Scan() directly onto it (the "." at the end of the line continues onto the next).
+	err := db.QueryRow(`SELECT id, company, title, url, status, applied_on, notes, created_at
+	                    FROM jobs WHERE id = ?`, id).
+		Scan(&j.ID, &j.Company, &j.Title, &j.URL, &j.Status, &j.AppliedOn, &j.Notes, &j.CreatedAt)
+	// If no row matched, Scan returns the special error sql.ErrNoRows.
+	// We just pass it up, and the handler will turn it into a 404.
+	return j, err
+}
+
+// updateJob overwrites every field of an existing job.
+func updateJob(db *sql.DB, j Job) error { // returns only an error: nothing else to give back
+	res, err := db.Exec(`UPDATE jobs
+	                     SET company = ?, title = ?, url = ?, status = ?, applied_on = ?, notes = ?
+	                     WHERE id = ?`, // WHERE limits the change to one job. Without it, EVERY row would change!
+		j.Company, j.Title, j.URL, j.Status, j.AppliedOn, j.Notes, j.ID) // the order matches the ?s exactly
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected() // how many rows the UPDATE actually changed
+	if err != nil {
+		return err
+	}
+	if n == 0 { // 0 rows changed = no job had that id
+		return sql.ErrNoRows // reuse the same "not found" error so the handler treats it the same way
+	}
+	return nil // nil error = success
+}
+
+
+// deleteJob removes a job by id.
+func deleteJob(db *sql.DB, id int64) error {
+	res, err := db.Exec(`DELETE FROM jobs WHERE id = ?`, id)
+	if err != nil {
+		return err
+	}
+	n, err := res.RowsAffected() // same trick as update: did we actually delete anything?
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return sql.ErrNoRows // nothing was deleted, so that id didn't exist
+	}
+	return nil
+}
+
+
