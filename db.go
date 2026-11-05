@@ -85,7 +85,6 @@ func createJob(db *sql.DB, j Job) (int64, error) {
 	return res.LastInsertId() // the id SQLite just assigned to the new row
 }
 
-
 // getJob returns the single job with this id.
 func getJob(db *sql.DB, id int64) (Job, error) {
 	var j Job // an empty Job to fill in
@@ -118,7 +117,6 @@ func updateJob(db *sql.DB, j Job) error { // returns only an error: nothing else
 	return nil // nil error = success
 }
 
-
 // deleteJob removes a job by id.
 func deleteJob(db *sql.DB, id int64) error {
 	res, err := db.Exec(`DELETE FROM jobs WHERE id = ?`, id)
@@ -134,5 +132,3 @@ func deleteJob(db *sql.DB, id int64) error {
 	}
 	return nil
 }
-
-

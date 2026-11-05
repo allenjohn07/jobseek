@@ -1,1 +1,4 @@
 jobs.db
+node_modules/
+/jobseek
+.DS_Store

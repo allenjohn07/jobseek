@@ -3,9 +3,9 @@ package main
 import (
 	"database/sql"
 	"encoding/json" // convert Go structs <-> JSON
-	"errors"   // NEW: lets us check which error we got (errors.Is)
+	"errors"        // NEW: lets us check which error we got (errors.Is)
 	"net/http"
-	"strconv"  // NEW: converts strings to numbers ("42" -> 42)
+	"strconv" // NEW: converts strings to numbers ("42" -> 42)
 )
 
 // App holds things our handlers need to share, like the database.
@@ -27,11 +27,10 @@ func (a *App) handleListJobs(w http.ResponseWriter, r *http.Request) {
 	jobs, err := listJobs(a.db)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError) // 500 = "server broke"
-		return // stop here; don't run the line below
+		return                                                     // stop here; don't run the line below
 	}
 	writeJSON(w, http.StatusOK, jobs) // 200 + the list as JSON
 }
-
 
 // POST /api/jobs: create a job from the JSON in the request body.
 func (a *App) handleCreateJob(w http.ResponseWriter, r *http.Request) {
@@ -50,8 +49,13 @@ func (a *App) handleCreateJob(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	j.ID = id                              // fill in the id the database assigned
-	writeJSON(w, http.StatusCreated, j)    // 201 = "created", and send back the saved job
+	// Read the job back so the response has the stored values (default status, createdAt).
+	created, err := getJob(a.db, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, http.StatusCreated, created) // 201 = "created", and send back the saved job
 }
 
 // parseID reads the {id} part of the URL and turns it into a number.
@@ -80,7 +84,6 @@ func (a *App) handleGetJob(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, j)
 }
-
 
 // PUT /api/jobs/{id}: replace a job's fields with the JSON sent.
 func (a *App) handleUpdateJob(w http.ResponseWriter, r *http.Request) {
@@ -121,7 +124,6 @@ func (a *App) handleUpdateJob(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, updated)
 }
-
 
 // DELETE /api/jobs/{id}: remove a job.
 func (a *App) handleDeleteJob(w http.ResponseWriter, r *http.Request) {

@@ -29,6 +29,26 @@
 	--chart-4: oklch(0.371 0 0);
 	--chart-5: oklch(0.269 0 0);
 	--radius: 0.625rem;
+	/* Notion tag palette: soft bg + dark text + dot, per status. Change here, applies everywhere. */
+	--tag-wishlist-bg: #e3e2e0;
+	--tag-wishlist-fg: #32302c;
+	--tag-wishlist-dot: #9b9a97;
+	--tag-applied-bg: #d3e5ef;
+	--tag-applied-fg: #183347;
+	--tag-applied-dot: #5b97bd;
+	--tag-interviewing-bg: #fdecc8;
+	--tag-interviewing-fg: #402c1b;
+	--tag-interviewing-dot: #cb912f;
+	--tag-offer-bg: #dbeddb;
+	--tag-offer-fg: #1c3829;
+	--tag-offer-dot: #4f9768;
+	--tag-rejected-bg: #ffe2dd;
+	--tag-rejected-fg: #5d1715;
+	--tag-rejected-dot: #d44c47;
+	/* Error / danger */
+	--danger-soft: #ffe2dd;
+	--danger-soft-foreground: #5d1715;
+	--danger: #d44c47;
 	--sidebar: oklch(0.985 0 0);
 	--sidebar-foreground: oklch(0.145 0 0);
 	--sidebar-primary: oklch(0.205 0 0);
@@ -74,6 +94,24 @@
 }
 
 @theme inline {
+	--color-tag-wishlist-bg: var(--tag-wishlist-bg);
+	--color-tag-wishlist-fg: var(--tag-wishlist-fg);
+	--color-tag-wishlist-dot: var(--tag-wishlist-dot);
+	--color-tag-applied-bg: var(--tag-applied-bg);
+	--color-tag-applied-fg: var(--tag-applied-fg);
+	--color-tag-applied-dot: var(--tag-applied-dot);
+	--color-tag-interviewing-bg: var(--tag-interviewing-bg);
+	--color-tag-interviewing-fg: var(--tag-interviewing-fg);
+	--color-tag-interviewing-dot: var(--tag-interviewing-dot);
+	--color-tag-offer-bg: var(--tag-offer-bg);
+	--color-tag-offer-fg: var(--tag-offer-fg);
+	--color-tag-offer-dot: var(--tag-offer-dot);
+	--color-tag-rejected-bg: var(--tag-rejected-bg);
+	--color-tag-rejected-fg: var(--tag-rejected-fg);
+	--color-tag-rejected-dot: var(--tag-rejected-dot);
+	--color-danger-soft: var(--danger-soft);
+	--color-danger-soft-foreground: var(--danger-soft-foreground);
+	--color-danger: var(--danger);
 	--font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, 'Apple Color Emoji', Arial, sans-serif;
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-sidebar-border: var(--sidebar-border);

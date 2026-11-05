@@ -3,13 +3,13 @@
 
   let { status }: { status: Status } = $props()
 
-  // Notion's tag colours: soft background + dark text of the same hue.
+  // Colours come from the --tag-* tokens in app.css.
   const styles: Record<Status, { tag: string; dot: string }> = {
-    wishlist: { tag: 'bg-[#e3e2e0] text-[#32302c]', dot: 'bg-[#9b9a97]' },
-    applied: { tag: 'bg-[#d3e5ef] text-[#183347]', dot: 'bg-[#5b97bd]' },
-    interviewing: { tag: 'bg-[#fdecc8] text-[#402c1b]', dot: 'bg-[#cb912f]' },
-    offer: { tag: 'bg-[#dbeddb] text-[#1c3829]', dot: 'bg-[#4f9768]' },
-    rejected: { tag: 'bg-[#ffe2dd] text-[#5d1715]', dot: 'bg-[#d44c47]' },
+    wishlist: { tag: 'bg-tag-wishlist-bg text-tag-wishlist-fg', dot: 'bg-tag-wishlist-dot' },
+    applied: { tag: 'bg-tag-applied-bg text-tag-applied-fg', dot: 'bg-tag-applied-dot' },
+    interviewing: { tag: 'bg-tag-interviewing-bg text-tag-interviewing-fg', dot: 'bg-tag-interviewing-dot' },
+    offer: { tag: 'bg-tag-offer-bg text-tag-offer-fg', dot: 'bg-tag-offer-dot' },
+    rejected: { tag: 'bg-tag-rejected-bg text-tag-rejected-fg', dot: 'bg-tag-rejected-dot' },
   }
   const s = $derived(styles[status] ?? styles.wishlist)
 </script>

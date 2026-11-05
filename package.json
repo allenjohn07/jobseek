@@ -1,0 +1,14 @@
+{
+  "name": "jobseek",
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "test:go": "test -z \"$(gofmt -l *.go)\" && go vet ./... && go test ./...",
+    "test:web": "bun run --cwd web check && bun run --cwd web test:run",
+    "test": "bun run test:go && bun run test:web",
+    "build": "bun run --cwd web build && go build -o /dev/null ."
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

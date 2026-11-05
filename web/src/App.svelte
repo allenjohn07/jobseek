@@ -15,6 +15,7 @@
     import DatePicker from "$lib/components/DatePicker.svelte";
     import ColumnFilter, { type FilterOption } from "$lib/components/ColumnFilter.svelte";
     import StatusBadge from "$lib/components/StatusBadge.svelte";
+    import ErrorBanner from "$lib/components/ErrorBanner.svelte";
     import ExternalLinkIcon from "@lucide/svelte/icons/external-link";
     import JobFormDialog from "$lib/components/JobFormDialog.svelte";
 
@@ -207,9 +208,7 @@
     </div>
 
     {#if error}
-        <p class="mt-4 rounded-sm bg-[#ffe2dd] p-3 text-sm text-[#5d1715]">
-            {error}
-        </p>
+        <div class="mt-4"><ErrorBanner message={error} /></div>
     {/if}
 
     {#if loading}
@@ -319,7 +318,7 @@
                                 type="button"
                                 aria-label="Delete {job.title}"
                                 onclick={() => (deleting = job)}
-                                class="rounded-sm p-1.5 text-muted-foreground hover:bg-[#ffe2dd] hover:text-[#d44c47]"
+                                class="rounded-sm p-1.5 text-muted-foreground hover:bg-danger-soft hover:text-danger"
                             >
                                 <Trash2Icon class="size-4" />
                             </button>

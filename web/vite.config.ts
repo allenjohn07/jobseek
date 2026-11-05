@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
@@ -6,7 +6,15 @@ import path from 'node:path'
 export default defineConfig({
   plugins: [svelte(), tailwindcss()],  // compile .svelte files + generate Tailwind CSS
   resolve: {
-    alias: { $lib: path.resolve(__dirname, './src/lib') },
+    // Svelte must resolve to its browser build under jsdom, otherwise mount() is unavailable.
+    conditions: process.env.VITEST ? ['browser'] : undefined,
+    alias: { $lib: path.resolve(import.meta.dirname, './src/lib') },
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test-setup.ts'],
+    include: ['src/**/*.test.ts'],
+    restoreMocks: true,
   },
   server: {
     proxy: {

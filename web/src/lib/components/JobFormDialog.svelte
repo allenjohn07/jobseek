@@ -107,7 +107,7 @@
         ></textarea>
       </div>
 
-      {#if error}<p class="px-4 pb-2 text-sm text-[#d44c47]">{error}</p>{/if}
+      {#if error}<p class="px-4 pb-2 text-sm text-danger">{error}</p>{/if}
 
       <div class="flex items-center justify-end gap-1 border-t bg-muted/40 px-3 py-2">
         <Button type="button" variant="ghost" onclick={() => (open = false)}>Cancel</Button>
