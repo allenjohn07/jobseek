@@ -14,3 +14,9 @@ export interface Job {
   notes: string
   createdAt: string
 }
+
+// Runtime list of all statuses (the type above only exists at compile time).
+export const STATUSES: Status[] = ['wishlist', 'applied', 'interviewing', 'offer', 'rejected']
+
+// What the form edits: a Job without the server-assigned fields.
+export type JobInput = Omit<Job, 'id' | 'createdAt'>
