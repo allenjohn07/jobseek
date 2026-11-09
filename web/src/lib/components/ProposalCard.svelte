@@ -26,24 +26,24 @@
   function order(content: ResumeContent) {
     return (toDocument(content).content ?? []).filter(node => node.type === 'heading' && node.attrs?.level === 2).map(documentText).join(' → ') || 'No named sections'
   }
-  const removed = 'rounded-sm bg-tag-rejected-bg px-1.5 py-1 text-tag-rejected-fg line-through'
-  const added = 'rounded-sm bg-tag-offer-bg px-1.5 py-1 text-tag-offer-fg'
+  const removed = 'rounded-control bg-danger-soft px-2.5 py-1.5 text-danger-soft-foreground line-through'
+  const added = 'rounded-control bg-success-soft px-2.5 py-1.5 text-success-soft-foreground'
 </script>
 
-<div class="rounded-md border p-3 text-sm">
-  <p class="text-xs font-medium text-muted-foreground">{verb[proposal.op]}</p>
+<div class="animate-rise rounded-card bg-card p-4 text-sm shadow-card">
+  <p class="hand text-base text-ink-muted">{verb[proposal.op]}</p>
   <div class="mt-1.5 grid gap-1">
     {#if proposal.op === 'replace_document'}
       {#if before && after}
         <p class="mt-2 text-xs font-medium">Section order</p>
         <p class="text-xs leading-5 text-muted-foreground"><span class="font-medium">Current:</span> {order(before)}</p>
         <p class="text-xs leading-5"><span class="font-medium">Proposed:</span> {order(after)}</p>
-        <details bind:open={reviewing} class="mt-2 rounded-md border">
+        <details bind:open={reviewing} class="mt-2 rounded-control bg-sunken">
           <summary class="cursor-pointer px-3 py-2 text-xs font-medium">Review full document</summary>
           {#if reviewing}
-            <div class="max-h-[65vh] space-y-4 overflow-y-auto border-t bg-muted/20 p-2">
-              <div><p class="p-2 text-xs font-semibold">Current resume</p><div class="rounded border"><ResumeDocument printable={false} content={before} /></div></div>
-              <div><p class="p-2 text-xs font-semibold">Proposed resume</p><div class="rounded border"><ResumeDocument printable={false} content={after} /></div></div>
+            <div class="max-h-[65vh] space-y-4 overflow-y-auto border-t border-line p-2">
+              <div><p class="p-2 text-xs font-semibold">Current resume</p><div class="overflow-hidden rounded-control shadow-card"><ResumeDocument printable={false} content={before} /></div></div>
+              <div><p class="p-2 text-xs font-semibold">Proposed resume</p><div class="overflow-hidden rounded-control shadow-card"><ResumeDocument printable={false} content={after} /></div></div>
             </div>
           {/if}
         </details>

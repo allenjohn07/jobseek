@@ -167,20 +167,19 @@
 
 <div>
     <!-- Notion-style view toolbar -->
-    <div class="mt-8 mb-2 flex items-center justify-between">
-        <div class="flex items-center gap-2 text-sm">
-            <span class="rounded-sm bg-accent px-2 py-1 font-medium">Table</span
-            >
-            <span class="text-muted-foreground"
-                >{filtering
-                    ? `${filteredJobs.length} of ${jobs.length} jobs`
-                    : `${jobs.length} ${jobs.length === 1 ? "job" : "jobs"}`}</span
-            >
+    <div class="mb-4 flex items-end justify-between gap-4">
+        <div class="flex items-center gap-3 text-sm">
+            <span class="rounded-chip bg-wash px-3 py-1 font-medium">Table</span>
+            <!-- The count is a live status so filter results are announced. -->
+            <p role="status" class="flex items-baseline gap-1.5 text-ink-muted">
+                {#if filtering}<span class="numeral text-3xl leading-none text-ink">{filteredJobs.length}</span> <span class="hand text-xl">of {jobs.length} jobs</span>
+                {:else}<span class="numeral text-3xl leading-none text-ink">{jobs.length}</span> <span class="hand text-xl">{jobs.length === 1 ? "job" : "jobs"}</span>{/if}
+            </p>
             {#if filtering}
                 <button
                     type="button"
                     onclick={clearFilters}
-                    class="rounded-sm px-1.5 py-0.5 text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                    class="rounded-chip px-2 py-0.5 text-ink-muted underline underline-offset-2 hover:text-ink"
                     >Clear filters</button
                 >
             {/if}
@@ -197,7 +196,7 @@
     {#if loading}
         <p class="mt-6 text-sm text-muted-foreground">Loading…</p>
     {:else}
-        <div class="overflow-hidden rounded-md border">
+        <div class="overflow-hidden rounded-card bg-card px-2 py-1 shadow-card">
         <Table.Root class="text-sm">
             <Table.Header>
                 <Table.Row class="hover:bg-transparent">
@@ -206,7 +205,7 @@
                     >
                     {#each columns as col (col.key)}
                         <Table.Head
-                            class="h-8 p-0 font-normal {col.w} {col.key !== 'url' ? 'border-r' : ''}"
+                            class="h-8 p-0 font-normal {col.w}"
                         >
                             <ColumnFilter
                                 label={col.label}
@@ -246,7 +245,7 @@
                                 />
                             </button>
                         </Table.Cell>
-                        <Table.Cell class="border-r p-1">
+                        <Table.Cell class="p-1">
                             <EditableCell
                                 label="Title"
                                 required
@@ -255,7 +254,7 @@
                                 onSave={(v) => patch(job, { title: v })}
                             />
                         </Table.Cell>
-                        <Table.Cell class="border-r p-1">
+                        <Table.Cell class="p-1">
                             <EditableCell
                                 label="Company"
                                 required
@@ -263,13 +262,13 @@
                                 onSave={(v) => patch(job, { company: v })}
                             />
                         </Table.Cell>
-                        <Table.Cell class="border-r p-1">
+                        <Table.Cell class="p-1">
                             <StatusSelect
                                 status={job.status}
                                 onChange={(s) => patch(job, { status: s })}
                             />
                         </Table.Cell>
-                        <Table.Cell class="border-r p-1">
+                        <Table.Cell class="p-1">
                             <DatePicker
                                 label="Applied on"
                                 value={job.appliedOn}

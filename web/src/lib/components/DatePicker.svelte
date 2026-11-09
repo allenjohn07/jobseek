@@ -58,7 +58,7 @@
     aria-label={label}
     class={variant === 'cell'
       ? 'flex w-full items-center gap-1.5 rounded-sm px-2 py-1.5 text-left hover:bg-accent/60 data-[state=open]:bg-accent'
-      : 'flex h-9 w-full items-center gap-2 rounded-md border border-input bg-transparent px-2.5 text-left text-sm shadow-xs'}
+      : 'flex h-9 w-full items-center gap-2 rounded-control border border-input bg-transparent px-3 text-left text-sm'}
   >
     {#if variant === 'field'}<CalendarIcon class="size-4 text-muted-foreground" />{/if}
     {#if pretty}

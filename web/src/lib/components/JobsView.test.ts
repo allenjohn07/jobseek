@@ -29,7 +29,7 @@ describe('JobsView', () => {
     render(JobsView)
     expect(await screen.findByDisplayValue('Acme')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Beta')).toBeInTheDocument()
-    expect(screen.getByText('2 jobs')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('2 jobs')
   })
 
   it('shows the empty state', async () => {
