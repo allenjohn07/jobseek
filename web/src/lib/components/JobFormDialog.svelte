@@ -18,7 +18,7 @@
     onSave: (input: JobInput) => Promise<void>
   } = $props()
 
-  const empty: JobInput = { company: '', title: '', url: '', status: 'wishlist', appliedOn: '', notes: '' }
+  const empty: JobInput = { company: '', title: '', url: '', status: 'wishlist', appliedOn: '', notes: '', description: '' }
   let form = $state<JobInput>({ ...empty })
   let saving = $state(false)
   let error = $state('')
@@ -53,7 +53,7 @@
 </script>
 
 <Dialog.Root bind:open>
-  <Dialog.Content class="gap-0 overflow-hidden p-0 sm:max-w-md" showCloseButton={false}>
+  <Dialog.Content class="max-h-[90dvh] gap-0 overflow-y-auto p-0 sm:max-w-xl" showCloseButton={false}>
     <Dialog.Title class="sr-only">Add job</Dialog.Title>
     <Dialog.Description class="sr-only">Add a new job application to your tracker.</Dialog.Description>
 
@@ -103,7 +103,21 @@
           aria-label="Notes"
           placeholder="Add notes…"
           bind:value={form.notes}
-          class="field-sizing-content max-h-40 min-h-12 w-full resize-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-sm border-0 bg-transparent px-2 py-1 text-sm outline-none placeholder:text-muted-foreground/50 hover:bg-accent/40 focus:bg-accent/60"
+          class="field-sizing-content max-h-64 min-h-12 w-full resize-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-sm border-0 bg-transparent px-2 py-1 text-sm outline-none placeholder:text-muted-foreground/50 hover:bg-accent/40 focus:bg-accent/60"
+        ></textarea>
+      </div>
+
+      <!-- Job description (used by JobTweak to tailor the resume) -->
+      <div class="border-t px-5 py-4">
+        <label for="new-job-description" class="text-sm font-medium">Job description</label>
+        <p class="mt-1 mb-2 text-xs text-muted-foreground">Paste the full posting. Job Tweak uses this to tailor your base resume.</p>
+        <textarea
+          id="new-job-description"
+          rows="6"
+          aria-label="Job description"
+          placeholder="Paste the job description…"
+          bind:value={form.description}
+          class="field-sizing-content max-h-64 min-h-12 w-full resize-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-sm border-0 bg-transparent px-2 py-1 text-sm outline-none placeholder:text-muted-foreground/50 hover:bg-accent/40 focus:bg-accent/60"
         ></textarea>
       </div>
 
