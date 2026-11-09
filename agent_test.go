@@ -257,7 +257,7 @@ while [ $# -gt 0 ]; do
   if [ "$1" = "--mcp-config" ]; then
     cp "$2" "$out/mcp.json"
     echo "$2" > "$out/mcp.path"
-    (stat -f %Lp "$2" 2>/dev/null || stat -c %a "$2") > "$out/mcp.mode"
+    (stat -c %a "$2" 2>/dev/null || stat -f %Lp "$2") > "$out/mcp.mode" # GNU (Linux) first, then BSD (macOS)
   fi
   shift
 done
