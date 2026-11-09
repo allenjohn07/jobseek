@@ -4,13 +4,21 @@ import (
 	"database/sql"
 	"encoding/json" // convert Go structs <-> JSON
 	"errors"        // NEW: lets us check which error we got (errors.Is)
+	"net"
 	"net/http"
+	"net/url"
 	"strconv" // NEW: converts strings to numbers ("42" -> 42)
+	"sync"
 )
 
 // App holds things our handlers need to share, like the database.
 type App struct {
-	db *sql.DB // * = a pointer: we share one database handle, we don't copy it
+	db      *sql.DB     // * = a pointer: we share one database handle, we don't copy it
+	baseURL string      // where this server can be reached, e.g. http://127.0.0.1:8080 (used by the AI agent)
+	agent   agentRunner // runs chat turns; nil means the real Claude Code CLI
+
+	mu      sync.Mutex
+	running map[int64]bool // resumes with a chat in progress
 }
 
 // writeJSON is a small helper so every handler sends JSON the same way.
@@ -142,4 +150,32 @@ func (a *App) handleDeleteJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNoContent) // 204 = "done, and there's nothing to send back"
+}
+
+// isLocalHost reports whether a host[:port] value names this machine.
+func isLocalHost(hostport string) bool {
+	host, _, err := net.SplitHostPort(hostport)
+	if err != nil {
+		host = hostport // no port present
+	}
+	return host == "localhost" || host == "127.0.0.1" || host == "::1" || host == "[::1]"
+}
+
+// localOnly rejects requests whose Host or Origin isn't this machine. That blocks
+// DNS-rebinding and cross-site requests from other web pages to our unauthenticated API.
+func localOnly(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !isLocalHost(r.Host) {
+			http.Error(w, "forbidden host", http.StatusForbidden)
+			return
+		}
+		if origin := r.Header.Get("Origin"); origin != "" {
+			u, err := url.Parse(origin)
+			if err != nil || !isLocalHost(u.Host) {
+				http.Error(w, "forbidden origin", http.StatusForbidden)
+				return
+			}
+		}
+		next.ServeHTTP(w, r)
+	})
 }

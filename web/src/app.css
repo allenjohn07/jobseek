@@ -172,3 +172,62 @@ html {
 html::-webkit-scrollbar {
 	display: none;
 }
+
+/* Print the resume alone, without leaving hidden workspace panels in the page flow. */
+@media print {
+  body *:not(.resume-print):not(.resume-print *):not(:has(.resume-print)) {
+    display: none !important;
+  }
+  body *:has(.resume-print) {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+  }
+  .resume-print {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    color: #111;
+    background: white;
+  }
+  .resume-print h2 { break-after: avoid; }
+  .resume-print li { break-inside: avoid; }
+  @page { margin: 16mm; }
+}
+
+/* Keep every form field scrollable without visible scrollbars or number spinners. */
+input, textarea, select, [contenteditable="true"] {
+  scrollbar-width: none;
+}
+input::-webkit-scrollbar, textarea::-webkit-scrollbar, select::-webkit-scrollbar,
+[contenteditable="true"]::-webkit-scrollbar { display: none; }
+input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+input::-webkit-inner-spin-button, input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Shared document typography for editing, preview and PDF. */
+.resume-prose { outline: none; font-size: 14px; line-height: 1.65; overflow-wrap: anywhere; }
+.resume-prose > :first-child { margin-top: 0; }
+.resume-prose h1 { margin: 1.3em 0 .35em; font-size: 2.1em; font-weight: 650; line-height: 1.2; letter-spacing: -.025em; }
+.resume-prose h2 { margin: 1.5em 0 .6em; padding-bottom: .3em; border-bottom: 1px solid var(--border); font-size: 1.05em; font-weight: 650; }
+.resume-prose h3 { margin: .9em 0 .2em; font-size: 1em; font-weight: 650; }
+.resume-prose p { margin: .45em 0; min-height: 1em; }
+.resume-prose ul, .resume-prose ol { margin: .5em 0; padding-left: 1.5em; }
+.resume-prose ul { list-style: disc; } .resume-prose ol { list-style: decimal; }
+.resume-prose li { padding-left: .15em; } .resume-prose li p { margin: .2em 0; }
+.resume-prose strong { font-weight: 650; } .resume-prose em { font-style: italic; }
+.resume-prose a { color: #2563eb; text-decoration: underline; }
+.resume-prose blockquote { border-left: 3px solid var(--border); margin: 1em 0; padding-left: 1em; color: var(--muted-foreground); }
+.resume-prose hr { border-top: 1px solid var(--border); margin: 1.5em 0; }
+.resume-prose table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 1em 0; }
+.resume-prose th, .resume-prose td { border: 1px solid var(--border); padding: .5em .7em; vertical-align: top; position: relative; }
+.resume-prose th { background: var(--muted); font-weight: 600; }
+.resume-prose .selectedCell { background: var(--accent); }
+.resume-prose [data-resume-key^="basics."]:not(h1):not([data-resume-key="basics.headline"]) { display: inline-block; margin: 0 .9em .6em 0; font-size: .9em; color: var(--muted-foreground); }
+.resume-prose [data-resume-key$=":start"], .resume-prose [data-resume-key$=":end"] { display: inline-block; margin: 0 .6em .2em 0; color: var(--muted-foreground); font-size: .9em; }
+.resume-prose [data-resume-key$=":company"] { margin: 0; }
+@media print { .resume-print .document-page { max-width: none; padding: 0; border: 0; box-shadow: none; } .resume-prose { color: #111; } .resume-prose tr { break-inside: avoid; } }

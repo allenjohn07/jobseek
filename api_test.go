@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -17,13 +18,14 @@ func newTestServer(t *testing.T) (http.Handler, *App) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { db.Close() })
-	app := &App{db: db}
+	app := &App{db: db, baseURL: "http://127.0.0.1:8080"}
 	return app.routes(), app
 }
 
 func do(t *testing.T, h http.Handler, method, path, body string) *httptest.ResponseRecorder {
 	t.Helper()
 	req := httptest.NewRequest(method, path, bytes.NewBufferString(body))
+	req.Host = "localhost:8080" // the app only serves local hosts
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 	return rec
@@ -142,5 +144,76 @@ func TestDeleteJob(t *testing.T) {
 	}
 	if rec := do(t, h, "DELETE", "/api/jobs/1", ""); rec.Code != http.StatusNotFound {
 		t.Fatalf("second delete = %d, want 404", rec.Code)
+	}
+}
+
+func TestLocalOnly(t *testing.T) {
+	h, _ := newTestServer(t)
+	tests := []struct {
+		name, host, origin string
+		want               int
+	}{
+		{"localhost", "localhost:8080", "", http.StatusOK},
+		{"loopback ip", "127.0.0.1:8080", "", http.StatusOK},
+		{"local origin", "localhost:5173", "http://localhost:5173", http.StatusOK},
+		{"foreign host (DNS rebinding)", "evil.example.com", "", http.StatusForbidden},
+		{"foreign origin", "localhost:8080", "https://evil.example.com", http.StatusForbidden},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest("GET", "/api/jobs", nil)
+			req.Host = tt.host
+			if tt.origin != "" {
+				req.Header.Set("Origin", tt.origin)
+			}
+			rec := httptest.NewRecorder()
+			h.ServeHTTP(rec, req)
+			if rec.Code != tt.want {
+				t.Fatalf("status = %d, want %d", rec.Code, tt.want)
+			}
+		})
+	}
+}
+
+func TestJobDescription(t *testing.T) {
+	h, _ := newTestServer(t)
+	created := decodeJob(t, do(t, h, "POST", "/api/jobs", `{"company":"Acme","title":"Dev","description":"Build Go services"}`))
+	if created.Description != "Build Go services" {
+		t.Fatalf("description = %q", created.Description)
+	}
+	got := decodeJob(t, do(t, h, "PUT", "/api/jobs/1", `{"company":"Acme","title":"Dev","description":"Updated"}`))
+	if got.Description != "Updated" {
+		t.Fatalf("description after update = %q", got.Description)
+	}
+}
+
+// A database created before the description column existed must keep its rows after upgrade.
+func TestMigrateAddsDescription(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "old.db")
+	old, err := sql.Open("sqlite", path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = old.Exec(`CREATE TABLE jobs (
+	  id INTEGER PRIMARY KEY, company TEXT NOT NULL, title TEXT NOT NULL,
+	  url TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'wishlist',
+	  applied_on TEXT NOT NULL DEFAULT '', notes TEXT NOT NULL DEFAULT '',
+	  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+	  INSERT INTO jobs (company, title) VALUES ('Acme', 'Dev');`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	old.Close()
+
+	for i := 0; i < 2; i++ { // opening twice also proves the migration is idempotent
+		db, err := openDB(path)
+		if err != nil {
+			t.Fatalf("open #%d: %v", i, err)
+		}
+		jobs, err := listJobs(db)
+		if err != nil || len(jobs) != 1 || jobs[0].Company != "Acme" || jobs[0].Description != "" {
+			t.Fatalf("open #%d: jobs=%+v err=%v", i, jobs, err)
+		}
+		db.Close()
 	}
 }
