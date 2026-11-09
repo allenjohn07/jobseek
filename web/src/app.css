@@ -2,130 +2,210 @@
 @import "tw-animate-css";
 @import "shadcn-svelte/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/* Fonts, self-hosted so the app (and the planned single binary) works offline.
+   Each family has one job: display = headings, sans = body,
+   numeral = big numbers and the one large title per screen, hand = short status lines/labels. */
+@import "@fontsource-variable/funnel-display";
+@import "@fontsource-variable/funnel-sans";
+@import "@fontsource-variable/fraunces/soft.css";
+@import "@fontsource/gaegu/latin-400.css";
+@import "@fontsource/gaegu/latin-700.css";
 
+/* Theme: <html data-theme="light|dark">. index.html sets it before first paint
+   (saved choice, else the system preference); ThemeSwitch changes it. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ============================================================================
+   Design tokens. Components never hardcode colours, radii or shadows:
+   add a token here (plus its @theme entry) instead.
+   Near-monochrome ink on soft paper, one accent (daylight blue) for actions
+   and "live" things, status shown as small coloured marks, never boxes.
+   ============================================================================ */
 :root {
-	--background: oklch(1 0 0);
-	--foreground: #37352f;
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.145 0 0);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.145 0 0);
-	--primary: #efefed;
-	--primary-foreground: #37352f;
-	--secondary: oklch(0.97 0 0);
-	--secondary-foreground: oklch(0.205 0 0);
-	--muted: #f7f6f3;
-	--muted-foreground: #787774;
-	--accent: #efefed;
-	--accent-foreground: oklch(0.205 0 0);
-	--destructive: oklch(0.577 0.245 27.325);
-	--border: #e9e9e7;
-	--input: oklch(0.922 0 0);
-	--ring: oklch(0.708 0 0);
-	--chart-1: oklch(0.87 0 0);
-	--chart-2: oklch(0.556 0 0);
-	--chart-3: oklch(0.439 0 0);
-	--chart-4: oklch(0.371 0 0);
-	--chart-5: oklch(0.269 0 0);
-	--radius: 0.625rem;
-	/* Notion tag palette: soft bg + dark text + dot, per status. Change here, applies everywhere. */
-	--tag-wishlist-bg: #e3e2e0;
-	--tag-wishlist-fg: #32302c;
-	--tag-wishlist-dot: #9b9a97;
-	--tag-applied-bg: #d3e5ef;
-	--tag-applied-fg: #183347;
-	--tag-applied-dot: #5b97bd;
-	--tag-interviewing-bg: #fdecc8;
-	--tag-interviewing-fg: #402c1b;
-	--tag-interviewing-dot: #cb912f;
-	--tag-offer-bg: #dbeddb;
-	--tag-offer-fg: #1c3829;
-	--tag-offer-dot: #4f9768;
-	--tag-rejected-bg: #ffe2dd;
-	--tag-rejected-fg: #5d1715;
-	--tag-rejected-dot: #d44c47;
-	/* Error / danger */
-	--danger-soft: #ffe2dd;
-	--danger-soft-foreground: #5d1715;
-	--danger: #d44c47;
-	--sidebar: oklch(0.985 0 0);
-	--sidebar-foreground: oklch(0.145 0 0);
-	--sidebar-primary: oklch(0.205 0 0);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.97 0 0);
-	--sidebar-accent-foreground: oklch(0.205 0 0);
-	--sidebar-border: oklch(0.922 0 0);
-	--sidebar-ring: oklch(0.708 0 0);
+	color-scheme: light;
+
+	/* Neutrals */
+	--canvas: #f6f6f2;          /* page background */
+	--surface: #ffffff;         /* cards, sheets, popovers */
+	--sunken: #efeee8;          /* wells, hover, inactive tracks */
+	--line: #e5e4dd;            /* hairlines */
+	--wash: color-mix(in oklab, var(--ink) 7%, transparent); /* tracks and chips sitting on the canvas */
+	--ink: #1b1b19;
+	--ink-muted: #66655f;
+	--ink-faint: #a09f98;
+	--scrim: rgb(27 27 25 / 0.28);
+
+	/* The one accent */
+	--blue: #2f66f5;
+	--blue-ink: #ffffff;        /* text on blue */
+	--blue-soft: #e8eeff;
+
+	/* Semantic (full + soft for tinted backgrounds) */
+	--success: #2f8f5b;
+	--success-soft: #e2f2e8;
+	--success-soft-foreground: #1d5a39;
+	--danger: #d1453b;
+	--danger-soft: #fde5e2;
+	--danger-soft-foreground: #7a1f18;
+	--warning: #c98a12;
+	--warning-soft: #fbf0d6;
+
+	/* Marks: small dots only, never box fills */
+	--mark-green: #3f9f66;
+	--mark-gold: #d4a019;
+
+	/* Sky: hero panels */
+	--sky-top: #22397e;            /* calm daylight blue: lighter than the night sky, not neon */
+	--sky-mid: #2d4a9c;
+	--sky-low: #3a5aae;
+	--on-sky: #ffffff;
+	--star: rgb(255 255 255 / 0.55);       /* small dots on the sky */
+
+	/* Glass (only for controls floating over the sky) */
+	--glass-hi: rgb(255 255 255 / 0.3);
+	--glass-lo: rgb(255 255 255 / 0.08);
+	--glass-edge: rgb(255 255 255 / 0.45);
+
+	/* Paper: the resume document is always ink-on-white, in every theme and in the PDF */
+	--paper: #ffffff;
+	--paper-ink: #161614;
+	--paper-muted: #5f5e58;
+	--paper-line: #e3e2dc;
+	--paper-sunken: #f4f4f0;
+	--paper-select: #e8eeff;
+	--paper-link: #2f66f5;
+
+	/* Elevation: layered soft shadows instead of borders */
+	--shadow-card: 0 1px 2px rgb(27 27 25 / 0.04), 0 4px 12px -2px rgb(27 27 25 / 0.06), 0 14px 32px -14px rgb(27 27 25 / 0.1);
+	--shadow-lift: 0 2px 4px rgb(27 27 25 / 0.05), 0 12px 28px -6px rgb(27 27 25 / 0.14), 0 30px 60px -22px rgb(27 27 25 / 0.2);
+	--shadow-press: inset 0 1px 3px rgb(27 27 25 / 0.18);
+
+	/* Textured-button raw material */
+	--tb-highlight-light: rgb(255 255 255 / 0.9);
+	--tb-drop-neutral: rgb(27 27 25 / 0.1);
+
+	/* Motion */
+	--duration-fast: 120ms;
+	--duration-base: 200ms;
+	--duration-slow: 360ms;
+
+	/* shadcn-svelte primitives read these names, so they point at the tokens above. */
+	--background: var(--canvas);
+	--foreground: var(--ink);
+	--card: var(--surface);
+	--card-foreground: var(--ink);
+	--popover: var(--surface);
+	--popover-foreground: var(--ink);
+	--primary: var(--blue);
+	--primary-foreground: var(--blue-ink);
+	--secondary: var(--sunken);
+	--secondary-foreground: var(--ink);
+	--muted: var(--sunken);
+	--muted-foreground: var(--ink-muted);
+	--accent: var(--sunken);            /* shadcn's "accent" is the hover surface, not the brand accent */
+	--accent-foreground: var(--ink);
+	--destructive: var(--danger);
+	--border: var(--line);
+	--input: var(--line);
+	--ring: var(--blue);
+	--radius: 0.75rem;
 }
 
-.dark {
-	--background: oklch(0.145 0 0);
-	--foreground: oklch(0.985 0 0);
-	--card: oklch(0.205 0 0);
-	--card-foreground: oklch(0.985 0 0);
-	--popover: oklch(0.205 0 0);
-	--popover-foreground: oklch(0.985 0 0);
-	--primary: oklch(0.922 0 0);
-	--primary-foreground: oklch(0.205 0 0);
-	--secondary: oklch(0.269 0 0);
-	--secondary-foreground: oklch(0.985 0 0);
-	--muted: oklch(0.269 0 0);
-	--muted-foreground: oklch(0.708 0 0);
-	--accent: oklch(0.269 0 0);
-	--accent-foreground: oklch(0.985 0 0);
-	--destructive: oklch(0.704 0.191 22.216);
-	--border: oklch(1 0 0 / 10%);
-	--input: oklch(1 0 0 / 15%);
-	--ring: oklch(0.556 0 0);
-	--chart-1: oklch(0.87 0 0);
-	--chart-2: oklch(0.556 0 0);
-	--chart-3: oklch(0.439 0 0);
-	--chart-4: oklch(0.371 0 0);
-	--chart-5: oklch(0.269 0 0);
-	--sidebar: oklch(0.205 0 0);
-	--sidebar-foreground: oklch(0.985 0 0);
-	--sidebar-primary: oklch(0.488 0.243 264.376);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.269 0 0);
-	--sidebar-accent-foreground: oklch(0.985 0 0);
-	--sidebar-border: oklch(1 0 0 / 10%);
-	--sidebar-ring: oklch(0.556 0 0);
+:root[data-theme="dark"] {
+	color-scheme: dark;
+	--canvas: #101216;
+	--surface: #171a1f;
+	--sunken: #0c0e11;
+	--line: #262a31;
+	--wash: color-mix(in oklab, var(--ink) 9%, transparent);
+	--ink: #ecebe5;
+	--ink-muted: #a3a29c;
+	--ink-faint: #6c6c68;
+	--scrim: rgb(0 0 0 / 0.55);
+
+	--blue: #6b93ff;
+	--blue-ink: #0b1020;
+	--blue-soft: #1b2645;
+
+	--success: #5cc28a;
+	--success-soft: #14281d;
+	--success-soft-foreground: #a8e6c3;
+	--danger: #f07a70;
+	--danger-soft: #35191a;
+	--danger-soft-foreground: #ffd2cc;
+	--warning: #e6b04a;
+	--warning-soft: #2d2412;
+
+	--mark-green: #5cc28a;
+	--mark-gold: #e2bd4f;
+
+	--sky-top: #0a1230;
+	--sky-mid: #13235a;
+	--sky-low: #1d3478;
+	--star: rgb(255 255 255 / 0.75);
+	--glass-hi: rgb(255 255 255 / 0.2);
+	--glass-lo: rgb(255 255 255 / 0.05);
+	--glass-edge: rgb(255 255 255 / 0.18);
+
+	--shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -10px rgb(0 0 0 / 0.5);
+	--shadow-lift: 0 2px 6px rgb(0 0 0 / 0.35), 0 18px 44px -12px rgb(0 0 0 / 0.6);
+	--shadow-press: inset 0 1px 3px rgb(0 0 0 / 0.5);
+	--tb-highlight-light: rgb(255 255 255 / 0.08);
+	--tb-drop-neutral: rgb(0 0 0 / 0.4);
 }
 
 @theme inline {
-	--color-tag-wishlist-bg: var(--tag-wishlist-bg);
-	--color-tag-wishlist-fg: var(--tag-wishlist-fg);
-	--color-tag-wishlist-dot: var(--tag-wishlist-dot);
-	--color-tag-applied-bg: var(--tag-applied-bg);
-	--color-tag-applied-fg: var(--tag-applied-fg);
-	--color-tag-applied-dot: var(--tag-applied-dot);
-	--color-tag-interviewing-bg: var(--tag-interviewing-bg);
-	--color-tag-interviewing-fg: var(--tag-interviewing-fg);
-	--color-tag-interviewing-dot: var(--tag-interviewing-dot);
-	--color-tag-offer-bg: var(--tag-offer-bg);
-	--color-tag-offer-fg: var(--tag-offer-fg);
-	--color-tag-offer-dot: var(--tag-offer-dot);
-	--color-tag-rejected-bg: var(--tag-rejected-bg);
-	--color-tag-rejected-fg: var(--tag-rejected-fg);
-	--color-tag-rejected-dot: var(--tag-rejected-dot);
+	--color-canvas: var(--canvas);
+	--color-surface: var(--surface);
+	--color-sunken: var(--sunken);
+	--color-line: var(--line);
+	--color-wash: var(--wash);
+	--color-ink: var(--ink);
+	--color-ink-muted: var(--ink-muted);
+	--color-ink-faint: var(--ink-faint);
+	--color-scrim: var(--scrim);
+	--color-blue-soft: var(--blue-soft);
+	--color-success: var(--success);
+	--color-success-soft: var(--success-soft);
+	--color-success-soft-foreground: var(--success-soft-foreground);
+	--color-danger: var(--danger);
 	--color-danger-soft: var(--danger-soft);
 	--color-danger-soft-foreground: var(--danger-soft-foreground);
-	--color-danger: var(--danger);
-	--font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, 'Apple Color Emoji', Arial, sans-serif;
-	--color-sidebar-ring: var(--sidebar-ring);
-	--color-sidebar-border: var(--sidebar-border);
-	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-	--color-sidebar-accent: var(--sidebar-accent);
-	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-	--color-sidebar-primary: var(--sidebar-primary);
-	--color-sidebar-foreground: var(--sidebar-foreground);
-	--color-sidebar: var(--sidebar);
-	--color-chart-5: var(--chart-5);
-	--color-chart-4: var(--chart-4);
-	--color-chart-3: var(--chart-3);
-	--color-chart-2: var(--chart-2);
-	--color-chart-1: var(--chart-1);
+	--color-warning: var(--warning);
+	--color-warning-soft: var(--warning-soft);
+	--color-on-sky: var(--on-sky);
+	--color-paper: var(--paper);
+	--color-paper-ink: var(--paper-ink);
+
+	/* Job status marks (StatusBadge): one dot colour per status */
+	--color-mark-wishlist: var(--ink-faint);
+	--color-mark-applied: var(--blue);
+	--color-mark-interviewing: var(--mark-gold);
+	--color-mark-offer: var(--mark-green);
+	--color-mark-rejected: var(--danger);
+
+	--font-sans: "Funnel Sans Variable", ui-sans-serif, system-ui, sans-serif;
+	--font-display: "Funnel Display Variable", "Funnel Sans Variable", ui-sans-serif, system-ui, sans-serif;
+	--font-numeral: "Fraunces Variable", ui-serif, Georgia, serif;
+	--font-hand: "Gaegu", ui-rounded, "Comic Sans MS", cursive;
+
+	/* Rounding vocabulary: bigger = more "surface" */
+	--radius-chip: 999px;
+	--radius-control: 16px;
+	--radius-card: 24px;
+	--radius-sheet: 32px;
+	--radius-sm: calc(var(--radius) * 0.6);
+	--radius-md: calc(var(--radius) * 0.8);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) * 1.4);
+
+	--shadow-card: var(--shadow-card);
+	--shadow-lift: var(--shadow-lift);
+	--shadow-press: var(--shadow-press);
+
+	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+	--ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
 	--color-ring: var(--ring);
 	--color-input: var(--input);
 	--color-border: var(--border);
@@ -144,26 +224,159 @@
 	--color-card: var(--card);
 	--color-foreground: var(--foreground);
 	--color-background: var(--background);
-	--radius-sm: calc(var(--radius) * 0.6);
-	--radius-md: calc(var(--radius) * 0.8);
-	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) * 1.4);
-	--radius-2xl: calc(var(--radius) * 1.8);
-	--radius-3xl: calc(var(--radius) * 2.2);
-	--radius-4xl: calc(var(--radius) * 2.6);
 }
 
 @layer base {
 	* {
 		@apply border-border outline-ring/50;
 	}
-	body {
-		@apply bg-background text-foreground;
-	}
 	html {
 		@apply font-sans;
 	}
+	body {
+		@apply bg-background text-foreground antialiased;
+	}
+	h1, h2, h3 {
+		font-family: var(--font-display);
+		letter-spacing: -0.015em;
+	}
+	/* Tailwind's reset gives buttons the arrow cursor; every clickable thing gets the pointer. */
+	button:not(:disabled),
+	[role="button"]:not([aria-disabled="true"]),
+	[role="option"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [role="tab"],
+	a[href], summary, label[for], select:not(:disabled),
+	input[type="checkbox"]:not(:disabled), input[type="radio"]:not(:disabled), input[type="file"]:not(:disabled) {
+		cursor: pointer;
+	}
+	button:disabled, [aria-disabled="true"], select:disabled, input:disabled {
+		cursor: not-allowed;
+	}
 }
+
+/* ---- Typography roles ---------------------------------------------------- */
+
+/* Fraunces with the SOFT axis: big numerals and the one large title per screen. */
+@utility numeral {
+	font-family: var(--font-numeral);
+	font-variation-settings: "SOFT" 100;
+	font-variant-numeric: lining-nums tabular-nums;
+	letter-spacing: -0.02em;
+}
+
+/* Gaegu: short status lines and labels only. Set one size up, it runs small. */
+@utility hand {
+	font-family: var(--font-hand);
+	letter-spacing: 0.01em;
+	line-height: 1.2;
+}
+
+/* ---- Layout patterns ----------------------------------------------------- */
+
+/* Rows separated by hairlines, not boxes. */
+@utility rows {
+	& > * + * {
+		border-top: 1px solid var(--line);
+	}
+}
+
+/* The sky: a soft daylight gradient for the hero panel. */
+@utility bg-sky {
+	background:
+		radial-gradient(120% 90% at 85% 0%, rgb(255 255 255 / 0.18), transparent 55%),
+		linear-gradient(172deg, var(--sky-top), var(--sky-mid) 58%, var(--sky-low));
+}
+
+/* ---- Signature material: glass -------------------------------------------
+   Reserved for controls floating over something alive (the sky). Not a general surface. */
+@utility glass {
+	background:
+		linear-gradient(160deg, var(--glass-hi), var(--glass-lo) 60%),
+		rgb(255 255 255 / 0.06);
+	backdrop-filter: blur(18px) saturate(1.5);
+	-webkit-backdrop-filter: blur(18px) saturate(1.5);
+	box-shadow:
+		inset 0 1px 0 var(--glass-edge),
+		inset 0 0 0 1px rgb(255 255 255 / 0.12),
+		0 8px 24px -10px rgb(10 20 60 / 0.35);
+}
+@utility glass-sky {
+	color: var(--on-sky);
+}
+
+/* ---- Textured buttons -----------------------------------------------------
+   Two layers: a face gradient (padding-box) inside a shell gradient (border-box)
+   reads as a slightly 3D, pressable surface. Variants only swap the variables. */
+@utility tb {
+	border: 1px solid transparent;
+	background:
+		linear-gradient(180deg, var(--tb-face-top), var(--tb-face-bottom)) padding-box,
+		linear-gradient(180deg, var(--tb-shell-top), var(--tb-shell-bottom)) border-box;
+	color: var(--tb-ink);
+	box-shadow:
+		inset 0 1px 0 var(--tb-highlight),
+		0 1px 2px var(--tb-drop),
+		0 3px 8px -3px var(--tb-drop);
+	transition:
+		transform var(--duration-fast) var(--ease-out-soft),
+		box-shadow var(--duration-fast) var(--ease-out-soft),
+		filter var(--duration-fast) var(--ease-out-soft);
+	&:hover {
+		filter: brightness(1.04);
+	}
+	&:active {
+		transform: translateY(1px);
+		box-shadow: var(--shadow-press);
+	}
+}
+@utility tb-primary {
+	--tb-face-top: color-mix(in oklab, var(--blue), white 16%);
+	--tb-face-bottom: var(--blue);
+	--tb-shell-top: color-mix(in oklab, var(--blue), black 2%);
+	--tb-shell-bottom: color-mix(in oklab, var(--blue), black 30%);
+	--tb-ink: var(--blue-ink);
+	--tb-highlight: rgb(255 255 255 / 0.32);
+	--tb-drop: color-mix(in oklab, var(--blue), transparent 55%);
+}
+@utility tb-secondary {
+	--tb-face-top: var(--surface);
+	--tb-face-bottom: color-mix(in oklab, var(--surface), var(--sunken) 70%);
+	--tb-shell-top: var(--line);
+	--tb-shell-bottom: color-mix(in oklab, var(--line), var(--ink) 14%);
+	--tb-ink: var(--ink);
+	--tb-highlight: var(--tb-highlight-light);
+	--tb-drop: var(--tb-drop-neutral);
+}
+
+/* ---- Motion ---------------------------------------------------------------- */
+
+/* Cards arriving (e.g. a new AI suggestion) rise softly into place. */
+@utility animate-rise {
+	animation: rise var(--duration-slow) var(--ease-out-soft) both;
+}
+@keyframes rise {
+	from { opacity: 0; transform: translateY(8px) scale(0.98); }
+	to { opacity: 1; transform: none; }
+}
+
+/* A "live" dot breathes while something is working. */
+@utility live-dot {
+	animation: breathe 1.6s var(--ease-out-soft) infinite;
+}
+@keyframes breathe {
+	0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, currentColor, transparent 55%); }
+	50% { box-shadow: 0 0 0 5px transparent; }
+}
+
+/* Every animation has a reduced-motion fallback: things simply appear in place. */
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
 /* Hide the page scrollbar (scrolling still works) so the layout never shifts
    sideways when content height changes, e.g. while a notes panel opens/closes. */
 html {
@@ -192,8 +405,8 @@ html::-webkit-scrollbar {
     width: 100%;
     max-width: none;
     padding: 0;
-    color: #111;
-    background: white;
+    color: var(--paper-ink);
+    background: var(--paper);
   }
   .resume-print h2 { break-after: avoid; }
   .resume-print li { break-inside: avoid; }
@@ -213,21 +426,21 @@ input::-webkit-inner-spin-button, input::-webkit-outer-spin-button { -webkit-app
 .resume-prose { outline: none; font-size: 14px; line-height: 1.65; overflow-wrap: anywhere; }
 .resume-prose > :first-child { margin-top: 0; }
 .resume-prose h1 { margin: 1.3em 0 .35em; font-size: 2.1em; font-weight: 650; line-height: 1.2; letter-spacing: -.025em; }
-.resume-prose h2 { margin: 1.5em 0 .6em; padding-bottom: .3em; border-bottom: 1px solid var(--border); font-size: 1.05em; font-weight: 650; }
+.resume-prose h2 { margin: 1.5em 0 .6em; padding-bottom: .3em; border-bottom: 1px solid var(--paper-line); font-size: 1.05em; font-weight: 650; }
 .resume-prose h3 { margin: .9em 0 .2em; font-size: 1em; font-weight: 650; }
 .resume-prose p { margin: .45em 0; min-height: 1em; }
 .resume-prose ul, .resume-prose ol { margin: .5em 0; padding-left: 1.5em; }
 .resume-prose ul { list-style: disc; } .resume-prose ol { list-style: decimal; }
 .resume-prose li { padding-left: .15em; } .resume-prose li p { margin: .2em 0; }
 .resume-prose strong { font-weight: 650; } .resume-prose em { font-style: italic; }
-.resume-prose a { color: #2563eb; text-decoration: underline; }
-.resume-prose blockquote { border-left: 3px solid var(--border); margin: 1em 0; padding-left: 1em; color: var(--muted-foreground); }
-.resume-prose hr { border-top: 1px solid var(--border); margin: 1.5em 0; }
+.resume-prose a { color: var(--paper-link); text-decoration: underline; }
+.resume-prose blockquote { border-left: 3px solid var(--paper-line); margin: 1em 0; padding-left: 1em; color: var(--paper-muted); }
+.resume-prose hr { border-top: 1px solid var(--paper-line); margin: 1.5em 0; }
 .resume-prose table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 1em 0; }
-.resume-prose th, .resume-prose td { border: 1px solid var(--border); padding: .5em .7em; vertical-align: top; position: relative; }
-.resume-prose th { background: var(--muted); font-weight: 600; }
-.resume-prose .selectedCell { background: var(--accent); }
-.resume-prose [data-resume-key^="basics."]:not(h1):not([data-resume-key="basics.headline"]) { display: inline-block; margin: 0 .9em .6em 0; font-size: .9em; color: var(--muted-foreground); }
-.resume-prose [data-resume-key$=":start"], .resume-prose [data-resume-key$=":end"] { display: inline-block; margin: 0 .6em .2em 0; color: var(--muted-foreground); font-size: .9em; }
+.resume-prose th, .resume-prose td { border: 1px solid var(--paper-line); padding: .5em .7em; vertical-align: top; position: relative; }
+.resume-prose th { background: var(--paper-sunken); font-weight: 600; }
+.resume-prose .selectedCell { background: var(--paper-select); }
+.resume-prose [data-resume-key^="basics."]:not(h1):not([data-resume-key="basics.headline"]) { display: inline-block; margin: 0 .9em .6em 0; font-size: .9em; color: var(--paper-muted); }
+.resume-prose [data-resume-key$=":start"], .resume-prose [data-resume-key$=":end"] { display: inline-block; margin: 0 .6em .2em 0; color: var(--paper-muted); font-size: .9em; }
 .resume-prose [data-resume-key$=":company"] { margin: 0; }
-@media print { .resume-print .document-page { max-width: none; padding: 0; border: 0; box-shadow: none; } .resume-prose { color: #111; } .resume-prose tr { break-inside: avoid; } }
+@media print { .resume-print .document-page { max-width: none; padding: 0; border: 0; box-shadow: none; } .resume-prose { color: var(--paper-ink); } .resume-prose tr { break-inside: avoid; } }

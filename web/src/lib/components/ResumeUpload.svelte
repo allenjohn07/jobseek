@@ -36,15 +36,15 @@
     finally { saving = false }
   }
 </script>
-<section class="rounded-xl border bg-background p-5 sm:p-8" aria-label="Import base resume">
-  <p class="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Your starting point</p>
+<section class="rounded-card bg-card p-5 shadow-card sm:p-8" aria-label="Import base resume">
+  <p class="hand text-xl text-ink-muted">Your starting point</p>
   <h2 class="mt-2 text-2xl font-semibold">{draft ? 'Review your base resume' : 'Bring your experience with you'}</h2>
   <p class="mt-2 text-sm text-muted-foreground">{draft ? 'Check the imported content before saving. Your job-specific resumes keep their existing content.' : 'Upload your current resume. AI will organize the content into a clean, editable template for you to review.'}</p>
   {#if error}<div class="mt-4"><ErrorBanner message={error} /></div>{/if}
   <div class="mt-6 grid gap-6 {draft ? 'xl:grid-cols-2' : ''}">
     <div>
       {#if !draft}
-        <div role="region" aria-label="Resume drop zone" ondragover={(e) => e.preventDefault()} ondrop={(e) => { e.preventDefault(); read(e.dataTransfer?.files[0]) }} class="rounded-xl border-2 border-dashed bg-muted/30 p-8 text-center">
+        <div role="region" aria-label="Resume drop zone" ondragover={(e) => e.preventDefault()} ondrop={(e) => { e.preventDefault(); read(e.dataTransfer?.files[0]) }} class="rounded-card border-2 border-dashed border-line bg-sunken p-8 text-center">
           <p class="mb-3 font-medium">Drop your resume here</p>
           <Button variant="outline" disabled={busy} onclick={() => input?.click()}>Choose resume</Button>
           <input bind:this={input} type="file" aria-label="Upload resume" accept=".pdf,.docx" class="sr-only" disabled={busy} onchange={() => read(input?.files?.[0])} />
@@ -53,9 +53,9 @@
         </div>
       {/if}
       <label class="mt-4 block text-sm font-medium" for="resume-source">{draft ? 'Original resume text' : 'Or paste your resume text'}</label>
-      <textarea id="resume-source" bind:value={source} readonly={draft !== null} disabled={busy} rows={draft ? 22 : 8} class="mt-2 w-full rounded-lg border bg-background p-3 text-sm" placeholder="Paste the content of your current resume…"></textarea>
+      <textarea id="resume-source" bind:value={source} readonly={draft !== null} disabled={busy} rows={draft ? 22 : 8} class="mt-2 w-full rounded-control border-0 bg-sunken p-3 text-sm outline-none focus:ring-2 focus:ring-ring/30" placeholder="Paste the content of your current resume…"></textarea>
     </div>
-    {#if draft}<div class="rounded-lg border p-4"><ResumeEditor content={draft} onChange={(next) => draft = next} /></div>{/if}
+    {#if draft}<div class="rounded-card bg-sunken p-4"><ResumeEditor content={draft} onChange={(next) => draft = next} /></div>{/if}
   </div>
   <div class="mt-5 flex flex-wrap justify-end gap-2">
     <Button variant="ghost" disabled={saving} onclick={() => { controller?.abort(); onCancel() }}>Cancel</Button>

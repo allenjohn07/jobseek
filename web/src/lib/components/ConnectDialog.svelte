@@ -43,7 +43,7 @@
     </Dialog.Header>
     <ErrorBanner message={error} />
     {#if info}
-      <pre class="overflow-x-auto rounded-sm bg-muted p-3 text-xs whitespace-pre-wrap break-all" aria-label="Connect command">{info.command}</pre>
+      <pre class="overflow-x-auto rounded-control bg-sunken p-4 text-xs whitespace-pre-wrap break-all" aria-label="Connect command">{info.command}</pre>
       <p class="text-xs text-muted-foreground">The token is private to this computer. Don't share the command.</p>
       <Dialog.Footer>
         <Button onclick={copy}>{copied ? 'Copied' : 'Copy command'}</Button>

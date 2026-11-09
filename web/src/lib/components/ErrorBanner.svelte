@@ -3,5 +3,5 @@
 </script>
 
 {#if message}
-  <p role="alert" class="rounded-sm bg-danger-soft p-3 text-sm text-danger-soft-foreground">{message}</p>
+  <p role="alert" class="rounded-control bg-danger-soft px-4 py-3 text-sm text-danger-soft-foreground">{message}</p>
 {/if}

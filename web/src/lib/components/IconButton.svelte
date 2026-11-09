@@ -20,7 +20,7 @@
   aria-label={label}
   title={label}
   {onclick}
-  class="shrink-0 rounded-sm p-1.5 text-muted-foreground {danger
+  class="shrink-0 rounded-chip p-1.5 transition-colors duration-(--duration-fast) text-muted-foreground {danger
     ? 'hover:bg-danger-soft hover:text-danger'
     : 'hover:bg-accent hover:text-foreground'}"
 >

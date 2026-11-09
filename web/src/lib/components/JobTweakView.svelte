@@ -17,6 +17,7 @@
   import ProposalCard from '$lib/components/ProposalCard.svelte'
   import ConnectDialog from '$lib/components/ConnectDialog.svelte'
   import ChatPanel from '$lib/components/ChatPanel.svelte'
+  import Segmented from '$lib/components/Segmented.svelte'
   import PrinterIcon from '@lucide/svelte/icons/printer'
   import PlugIcon from '@lucide/svelte/icons/plug'
   import SparklesIcon from '@lucide/svelte/icons/sparkles'
@@ -232,21 +233,21 @@
 
   const title = $derived(job ? `${job.title} · ${job.company}` : 'Base resume')
   const navBtn = (active: boolean) =>
-    `w-full truncate rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent/60 ${active ? 'bg-accent font-medium' : ''}`
+    `w-full truncate rounded-control px-3 py-2 text-left text-sm transition-colors duration-(--duration-fast) hover:bg-sunken ${active ? 'bg-sunken font-medium text-ink' : 'text-ink-muted'}`
 
   init()
 </script>
 
 <Dialog.Root bind:open={chatOpen}>
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-  <div><p class="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Job Tweak</p><h2 class="mt-1 text-2xl font-semibold tracking-tight">Your experience. The right emphasis.</h2><p class="mt-2 text-sm text-muted-foreground">One base resume. A considered version for every opportunity.</p></div>
+  <div><p class="hand text-xl text-ink-muted">Tweak</p><h2 class="mt-1 text-3xl font-semibold">Your experience. The right emphasis.</h2><p class="mt-2 text-sm text-muted-foreground">One base resume. A considered version for every opportunity.</p></div>
   <Button variant="outline" onclick={() => connectOpen = true}><PlugIcon class="size-4" /> Connect AI</Button>
 </div>
 <div class="grid items-start gap-5 lg:grid-cols-[13rem_minmax(0,1fr)]">
-  <nav aria-label="Resumes" class="rounded-xl border bg-muted/20 p-3 lg:sticky lg:top-5">
+  <nav aria-label="Resumes" class="rounded-card bg-card p-3 shadow-card lg:sticky lg:top-5">
     <button type="button" class="{navBtn(selected === null)} py-3" aria-current={selected === null} onclick={() => select(null)}>Base resume<span class="mt-1 block text-xs font-normal text-muted-foreground">{baseReady ? 'Your saved starting point' : 'Upload to get started'}</span></button>
-    <p class="mt-6 mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your opportunities</p>
-    <input aria-label="Search jobs" bind:value={search} placeholder="Search jobs…" class="mb-2 w-full rounded-md border bg-background px-2 py-2 text-sm" />
+    <p class="hand mt-6 mb-2 px-2 text-lg text-ink-muted">Your opportunities</p>
+    <input aria-label="Search jobs" bind:value={search} placeholder="Search jobs…" class="mb-2 w-full rounded-control border-0 bg-sunken px-3 py-2 text-sm outline-none placeholder:text-ink-faint focus:ring-2 focus:ring-ring/30" />
     <div class="max-h-96 space-y-1 overflow-y-auto">
     {#each filteredJobs as j (j.id)}
       <button type="button" class={navBtn(selected === j.id)} aria-current={selected === j.id} onclick={() => select(j.id)}>{j.title}<span class="mt-1 block truncate text-xs font-normal text-muted-foreground">{j.company}</span></button>
@@ -267,7 +268,7 @@
             <Dialog.Trigger>
               {#snippet child({ props })}<Button variant="outline" {...props}><SparklesIcon class="size-4" /> Ask AI</Button>{/snippet}
             </Dialog.Trigger>
-            <div class="flex rounded-md bg-muted p-1" role="group" aria-label="View">{#each ['preview', 'edit'] as const as m}<button type="button" aria-pressed={mode === m} onclick={() => setMode(m)} class="rounded px-3 py-1 text-sm capitalize {mode === m ? 'bg-background shadow-xs' : 'text-muted-foreground'}">{m}</button>{/each}</div>
+            <Segmented label="View" items={[{ id: 'preview', label: 'preview' }, { id: 'edit', label: 'edit' }]} value={mode} onChange={(m) => setMode(m as 'edit' | 'preview')} />
             <Button variant="outline" onclick={exportPDF}><PrinterIcon class="size-4" /> Export PDF</Button>
           {/if}
         </div>
@@ -275,18 +276,18 @@
       <div class="grid items-start gap-5 {job || pending.length ? 'xl:grid-cols-[minmax(0,1fr)_24rem]' : ''}">
         <div class="min-w-0">
           {#if !job && !baseReady && !resume?.content.document}
-            <div class="rounded-xl border border-dashed bg-muted/20 p-8 text-center"><SparklesIcon class="mx-auto mb-4 size-8 text-muted-foreground" /><h3 class="text-xl font-semibold">Start with the resume you already have</h3><p class="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Upload a PDF or Word document, review the content, and save it as your base. Every job gets its own tailored copy.</p><Button class="mt-5" onclick={openImport}>Upload your resume</Button></div>
+            <div class="rounded-card border-2 border-dashed border-line bg-card/60 p-10 text-center"><SparklesIcon class="mx-auto mb-4 size-8 text-primary" /><h3 class="text-xl font-semibold">Start with the resume you already have</h3><p class="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Upload a PDF or Word document, review the content, and save it as your base. Every job gets its own tailored copy.</p><Button class="mt-5" onclick={openImport}>Upload your resume</Button></div>
           {:else if missing && job}
-            <div class="rounded-xl border bg-muted/20 p-8"><p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">A fresh perspective</p><h3 class="mt-3 text-xl font-semibold">Make your experience speak to this role.</h3><p class="mt-3 text-sm text-muted-foreground">Tailor your saved base resume to {job.company}. AI suggests changes for you to review before anything is applied.</p><Button variant="outline" class="mt-5" disabled={creating || !baseReady} onclick={createForJob}>{creating ? 'Creating…' : 'Create from base resume'}</Button></div>
-            {#if base}<div class="mt-4 overflow-hidden rounded-xl border shadow-sm"><p class="border-b bg-muted/30 px-4 py-2 text-xs text-muted-foreground">Base resume preview · Tailor to create this job’s version</p><ResumeDocument content={base.content} /></div>{/if}
+            <div class="rounded-card bg-card p-8 shadow-card"><p class="hand text-lg text-ink-muted">A fresh perspective</p><h3 class="mt-3 text-xl font-semibold">Make your experience speak to this role.</h3><p class="mt-3 text-sm text-muted-foreground">Tailor your saved base resume to {job.company}. AI suggests changes for you to review before anything is applied.</p><Button variant="outline" class="mt-5" disabled={creating || !baseReady} onclick={createForJob}>{creating ? 'Creating…' : 'Create from base resume'}</Button></div>
+            {#if base}<div class="mt-4 overflow-hidden rounded-card bg-card shadow-card"><p class="bg-sunken px-5 py-2.5 text-xs text-ink-muted">Base resume preview · Tailor to create this job’s version</p><ResumeDocument content={base.content} /></div>{/if}
           {:else if resume}
-            <div class="overflow-hidden rounded-xl border bg-background shadow-sm">{#if mode === 'edit'}<ResumeCanvas bind:this={canvas} content={resume.content} onChange={change} />{:else}<ResumeDocument content={resume.content} />{/if}</div>
+            <div class="overflow-hidden rounded-card bg-card shadow-card">{#if mode === 'edit'}<ResumeCanvas bind:this={canvas} content={resume.content} onChange={change} />{:else}<ResumeDocument content={resume.content} />{/if}</div>
           {/if}
         </div>
         {#if job || pending.length}<aside class="min-w-0 space-y-4">
           {#if job}
-            <section class="rounded-xl border bg-background p-4"><p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">01 · The opportunity</p><h3 class="mt-2 font-semibold">Job description</h3><p class="mt-1 mb-3 text-xs text-muted-foreground">Saved with this job. AI uses this to focus your resume.</p><EditableCell class="max-h-80 overflow-y-auto text-sm" multiline label="Job description" placeholder="Paste the full job description…" value={job.description} onSave={(v) => patchJob(job, { description: v })} /></section>
-            <section class="rounded-xl border bg-muted/30 p-4"><p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">02 · Find the fit</p><h3 class="mt-2 font-semibold">Tailor with AI</h3><p class="mt-2 text-sm text-muted-foreground">Highlight relevant experience using the facts in your resume.</p>
+            <section class="rounded-card bg-card p-5 shadow-card"><p class="hand text-lg text-ink-muted">01 · The opportunity</p><h3 class="mt-2 font-semibold">Job description</h3><p class="mt-1 mb-3 text-xs text-muted-foreground">Saved with this job. AI uses this to focus your resume.</p><EditableCell class="max-h-80 overflow-y-auto text-sm" multiline label="Job description" placeholder="Paste the full job description…" value={job.description} onSave={(v) => patchJob(job, { description: v })} /></section>
+            <section class="rounded-card bg-sunken p-5"><p class="hand text-lg text-ink-muted">02 · Find the fit</p><h3 class="mt-2 font-semibold">Tailor with AI</h3><p class="mt-2 text-sm text-muted-foreground">Highlight relevant experience using the facts in your resume.</p>
               {#if !baseReady}<Button variant="outline" class="mt-3" onclick={async () => { await select(null); importing = true }}>Upload a base resume</Button>{:else if !job.description.trim()}<p class="mt-3 text-xs text-muted-foreground">Add the job description above to start tailoring.</p>{/if}
               <Button class="mt-4 w-full" disabled={!baseReady || !job.description.trim() || generating || creating || jobSaving} onclick={tailor}><SparklesIcon class="size-4" />{generating ? 'Tailoring…' : 'Tailor resume'}</Button>
               {#if generating}<Button variant="ghost" class="mt-2 w-full" onclick={() => generation?.abort()}>Stop generation</Button>{/if}
@@ -304,7 +305,7 @@
   {@const sheetResume = resume}
   {#key sheetResume.id}
     <Dialog.Portal>
-      <Dialog.Content forceMount trapFocus={false} preventScroll={false} style={chatOpen ? undefined : 'display: none'} onInteractOutside={(event) => event.preventDefault()} class="agent-sheet fixed inset-y-0 right-0 z-50 flex h-dvh w-full max-w-[30rem] flex-col border-l bg-background shadow-2xl outline-none">
+      <Dialog.Content forceMount trapFocus={false} preventScroll={false} style={chatOpen ? undefined : 'display: none'} onInteractOutside={(event) => event.preventDefault()} class="agent-sheet fixed inset-y-2 right-2 z-50 flex h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-[30rem] flex-col overflow-hidden rounded-sheet bg-surface shadow-lift outline-none">
         {#snippet child({ props })}
         <div {...props} aria-modal="false">
         <Dialog.Title class="sr-only">Resume assistant</Dialog.Title>
@@ -320,7 +321,7 @@
 <ConnectDialog bind:open={connectOpen} />
 <style>
   :global(.agent-sheet[data-state="open"]), :global(.agent-sheet[data-open]) {
-    animation: agent-sheet-in 180ms ease-out;
+    animation: agent-sheet-in var(--duration-slow) var(--ease-out-soft);
   }
   @keyframes agent-sheet-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
   @media (prefers-reduced-motion: reduce) { :global(.agent-sheet) { animation: none !important; } }

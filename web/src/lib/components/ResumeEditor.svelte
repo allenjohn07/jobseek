@@ -27,7 +27,7 @@
 
   const heading = 'mt-9 mb-4 flex flex-wrap items-center justify-between gap-2 border-b pb-3 text-sm font-semibold tracking-tight'
   const addBtn =
-    'flex items-center gap-1 rounded-md border bg-background px-2.5 py-1.5 text-xs font-medium tracking-normal text-muted-foreground transition-colors hover:bg-accent hover:text-foreground'
+    'flex items-center gap-1 rounded-chip bg-surface px-3 py-1.5 text-xs font-medium tracking-normal text-ink-muted shadow-card transition-colors hover:text-ink'
 </script>
 
 {#snippet add(label: string, onclick: () => void)}
@@ -65,7 +65,7 @@
 {/snippet}
 
 <div class="resume-editor text-sm">
-  <div class="mb-6 rounded-lg bg-muted/40 px-4 py-3"><p class="font-medium">Make it yours</p><p class="mt-1 text-xs leading-5 text-muted-foreground">Refine the details below, or ask the resume assistant to help with any section.</p></div>
+  <div class="mb-6 rounded-control bg-surface px-4 py-3"><p class="font-medium">Make it yours</p><p class="mt-1 text-xs leading-5 text-muted-foreground">Refine the details below, or ask the resume assistant to help with any section.</p></div>
   <h2 class={heading.replace('mt-9', 'mt-0')}>Basics</h2>
   <div class="grid gap-4 sm:grid-cols-2">
     {#each basicsFields as f (f.key)}
@@ -92,7 +92,7 @@
 
   <h2 class={heading}>Experience {@render add('Add role', () => edit((c) => void c.experience.push(newExperience())))}</h2>
   {#each content.experience as exp, i (exp.id)}
-    <div class="mb-4 rounded-xl border bg-muted/10 p-4">
+    <div class="mb-4 rounded-card bg-surface p-4 shadow-card">
       <div class="flex items-center gap-1">
         <div class="grid min-w-0 flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
           <EditableCell label="Role" placeholder="Role" class="font-medium" value={exp.role} onSave={(v) => edit((c) => (c.experience[i].role = v))} />
@@ -110,7 +110,7 @@
 
   <h2 class={heading}>Projects {@render add('Add project', () => edit((c) => void c.projects.push(newProject())))}</h2>
   {#each content.projects as proj, i (proj.id)}
-    <div class="mb-4 rounded-xl border bg-muted/10 p-4">
+    <div class="mb-4 rounded-card bg-surface p-4 shadow-card">
       <div class="flex items-center gap-1">
         <div class="grid min-w-0 flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
           <EditableCell label="Project name" placeholder="Project name" class="font-medium" value={proj.name} onSave={(v) => edit((c) => (c.projects[i].name = v))} />
@@ -126,7 +126,7 @@
 
   <h2 class={heading}>Education {@render add('Add education', () => edit((c) => void c.education.push(newEducation())))}</h2>
   {#each content.education as ed, i (ed.id)}
-    <div class="mb-3 flex items-center gap-3 rounded-xl border bg-muted/10 p-4">
+    <div class="mb-3 flex items-center gap-3 rounded-card bg-surface p-4 shadow-card">
       <div class="grid min-w-0 flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
         <EditableCell label="School" placeholder="School" class="font-medium" value={ed.school} onSave={(v) => edit((c) => (c.education[i].school = v))} />
         <EditableCell label="Degree" placeholder="Degree" value={ed.degree} onSave={(v) => edit((c) => (c.education[i].degree = v))} />

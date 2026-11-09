@@ -4,8 +4,9 @@ import StatusBadge from './StatusBadge.svelte'
 import { STATUSES } from '$lib/types'
 
 describe('StatusBadge', () => {
-  it.each(STATUSES)('renders %s with its tag token classes', (status) => {
-    render(StatusBadge, { status })
-    expect(screen.getByText(status)).toHaveClass(`bg-tag-${status}-bg`, `text-tag-${status}-fg`)
+  it.each(STATUSES)('renders %s as a coloured mark, not a coloured box', (status) => {
+    const { container } = render(StatusBadge, { status })
+    expect(container.querySelector('[data-mark]')).toHaveClass(`bg-mark-${status}`)
+    expect(screen.getByText(status).className).not.toMatch(/\bbg-/)
   })
 })

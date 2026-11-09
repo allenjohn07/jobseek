@@ -107,10 +107,10 @@
         ></textarea>
       </div>
 
-      <!-- Job description (used by JobTweak to tailor the resume) -->
+      <!-- Job description (used by Tweak to tailor the resume) -->
       <div class="border-t px-5 py-4">
         <label for="new-job-description" class="text-sm font-medium">Job description</label>
-        <p class="mt-1 mb-2 text-xs text-muted-foreground">Paste the full posting. Job Tweak uses this to tailor your base resume.</p>
+        <p class="mt-1 mb-2 text-xs text-muted-foreground">Paste the full posting. Tweak uses this to tailor your base resume.</p>
         <textarea
           id="new-job-description"
           rows="6"

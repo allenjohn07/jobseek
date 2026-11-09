@@ -35,22 +35,29 @@ describe('App tabs', () => {
     expect(screen.getByRole('link', { name: 'Jobs' })).toHaveAttribute('aria-current', 'page')
   })
 
-  it('switches to JobTweak and back, and follows the URL hash', async () => {
+  it('switches to Tweak and back, and follows the URL hash', async () => {
     const user = userEvent.setup()
     render(App)
     await screen.findByText(/No jobs yet/)
 
-    await user.click(screen.getByRole('link', { name: 'JobTweak' }))
+    await user.click(screen.getByRole('link', { name: 'Tweak' }))
     expect(await screen.findByRole('heading', { name: 'Allen' })).toBeInTheDocument()
     expect(screen.queryByText(/No jobs yet/)).not.toBeInTheDocument()
-    expect(location.hash).toBe('#/jobtweak')
+    expect(location.hash).toBe('#/tweak')
 
     await user.click(screen.getByRole('link', { name: 'Jobs' }))
     expect(await screen.findByText(/No jobs yet/)).toBeInTheDocument()
   })
 
-  it('opens directly on JobTweak when the hash says so', async () => {
+  it('still opens Tweak from an old #/jobtweak link', async () => {
     location.hash = '#/jobtweak'
+    render(App)
+    expect(await screen.findByRole('heading', { name: 'Allen' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Tweak' })).toHaveAttribute('aria-current', 'page')
+  })
+
+  it('opens directly on Tweak when the hash says so', async () => {
+    location.hash = '#/tweak'
     render(App)
     expect(await screen.findByRole('heading', { name: 'Allen' })).toBeInTheDocument()
   })

@@ -107,18 +107,18 @@
   }
 </script>
 
-<section aria-label="AI chat" class="flex flex-col overflow-hidden bg-background {fillHeight ? 'h-full min-h-0 flex-1' : 'h-[clamp(28rem,calc(100dvh-25rem),48rem)] min-h-[28rem] rounded-xl border shadow-sm'}">
-  <header class="flex shrink-0 items-center gap-3 border-b bg-muted/25 px-5 py-4">
-    <span class="flex size-9 items-center justify-center rounded-xl border bg-background"><SparklesIcon class="size-4" /></span>
+<section aria-label="AI chat" class="flex flex-col overflow-hidden bg-surface {fillHeight ? 'h-full min-h-0 flex-1' : 'h-[clamp(28rem,calc(100dvh-25rem),48rem)] min-h-[28rem] rounded-card shadow-card'}">
+  <header class="flex shrink-0 items-center gap-3 border-b border-line px-5 py-4">
+    <span class="flex size-9 items-center justify-center rounded-control bg-blue-soft text-primary"><SparklesIcon class="size-4" /></span>
     <div class="min-w-0 flex-1"><h3 class="text-sm font-semibold">Resume assistant</h3><p class="mt-0.5 text-xs text-muted-foreground">Changes saved directly to this resume</p></div>
-    <span class="size-2 shrink-0 rounded-full {running ? 'animate-pulse bg-amber-500' : 'bg-emerald-500'}" aria-label={running ? 'Working' : 'Ready'}></span>
+    <span class="size-2 shrink-0 rounded-chip {running ? 'live-dot bg-primary text-primary' : 'bg-success'}" aria-label={running ? 'Working' : 'Ready'}></span>
     {#if onClose}<Button variant="ghost" size="icon-sm" aria-label="Close assistant" onclick={onClose}><XIcon class="size-4" /></Button>{/if}
   </header>
 
   <div bind:this={log} use:measure role="log" aria-live="polite" aria-relevant="additions text" class="relative min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-5 text-sm">
     {#each messages as m, i (i)}
       {#if m.role === 'user'}
-        <div class="ml-6 rounded-xl rounded-tr-sm bg-muted px-4 py-3"><p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">You</p><p class="break-words whitespace-pre-wrap">{m.text}</p></div>
+        <div class="ml-6 rounded-card rounded-tr-md bg-sunken px-4 py-3"><p class="hand mb-1 text-base text-ink-muted">You</p><p class="break-words whitespace-pre-wrap">{m.text}</p></div>
       {:else}
         <div use:anchorReply data-reply class="space-y-3" style:min-height={i === messages.length - 1 ? `${Math.max(180, logHeight - 40)}px` : undefined}>
           <p class="flex items-center gap-2 text-xs font-semibold"><SparklesIcon class="size-3.5" /> Resume assistant</p>
@@ -126,15 +126,15 @@
             {#if part.kind === 'text'}
               <p class="break-words leading-7 whitespace-pre-wrap">{part.text}</p>
             {:else}
-              <p class="rounded-md border bg-muted/20 px-3 py-2 text-xs text-muted-foreground">{part.label}</p>
+              <p class="flex items-center gap-2 rounded-control bg-sunken px-3 py-2 text-xs text-ink-muted"><span class="size-1.5 rounded-chip bg-primary"></span>{part.label}</p>
             {/if}
           {/each}
-          {#if running && i === messages.length - 1}<p class="flex items-center gap-2 text-xs text-muted-foreground"><span class="size-1.5 animate-pulse rounded-full bg-current"></span>{m.parts.length ? 'Working on your request…' : 'Reading your request…'}</p>{/if}
+          {#if running && i === messages.length - 1}<p class="hand flex items-center gap-2 text-base text-ink-muted"><span class="live-dot size-1.5 rounded-chip bg-primary text-primary"></span>{m.parts.length ? 'Working on your request…' : 'Reading your request…'}</p>{/if}
         </div>
       {/if}
     {:else}
       <div class="flex min-h-full flex-col justify-center py-6">
-        <SparklesIcon class="mb-4 size-7 text-muted-foreground" />
+        <SparklesIcon class="mb-4 size-7 text-primary" />
         <h4 class="text-xl font-semibold tracking-tight">What would you like to change?</h4>
         <p class="mt-3 leading-6 text-muted-foreground">Ask me to rewrite, add, remove, or reorganize any part of your resume. I’ll make the changes and update the document here.</p>
         <div class="mt-6 grid gap-2">
@@ -146,10 +146,10 @@
     {/each}
   </div>
 
-  {#if notice}<p role="status" class="shrink-0 border-t bg-muted/30 px-4 py-3 text-xs leading-5 text-muted-foreground">{notice}</p>{/if}
+  {#if notice}<p role="status" class="shrink-0 border-t border-line bg-sunken px-4 py-3 text-xs leading-5 text-ink-muted">{notice}</p>{/if}
   {#if error}<div class="shrink-0 px-4 pb-3"><ErrorBanner message={error} /></div>{/if}
-  <div class="shrink-0 border-t bg-muted/15 p-3">
-    <div class="rounded-xl border bg-background p-2 focus-within:ring-2 focus-within:ring-ring/20">
+  <div class="shrink-0 border-t border-line p-3">
+    <div class="rounded-card bg-sunken p-2 transition-shadow duration-(--duration-base) focus-within:ring-2 focus-within:ring-ring/30">
       <textarea aria-label="Message" placeholder="Tell me what to change…" rows="3" bind:value={draft} onkeydown={onKey} disabled={running} class="max-h-40 min-h-20 w-full resize-none border-0 bg-transparent p-2 text-sm leading-6 outline-none placeholder:text-muted-foreground disabled:opacity-60"></textarea>
       <div class="flex items-center justify-between gap-2 px-1 pb-1"><span class="text-[10px] text-muted-foreground">Enter to send · Shift + Enter for a new line</span>{#if running}<Button variant="outline" onclick={stop}>Stop</Button>{:else}<Button disabled={!draft.trim()} onclick={() => send(draft)}>Send</Button>{/if}</div>
     </div>
